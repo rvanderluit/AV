@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<AMP Name="ADA" >
+  <audioZones>
+    <audioZone zoneNumber="1" Name="Billiard Room" groupNumber="4" />
+    <audioZone zoneNumber="2" Name="Guest Bedroom" groupNumber="2" />
+    <audioZone zoneNumber="3" Name="Guest Living" groupNumber="2" />
+    <audioZone zoneNumber="4" Name="Caretaker" groupNumber="3" />
+    <audioZone zoneNumber="5" Name="Gym" groupNumber="3" />
+    <audioZone zoneNumber="6" Name="Liam's Room" groupNumber="2" />
+    <audioZone zoneNumber="7" Name="Sabrina's Room" groupNumber="2" />
+    <audioZone zoneNumber="8" Name="Bath 142" groupNumber="1" />
+    <audioZone zoneNumber="9" Name="Bath 143" groupNumber="1" />
+    <audioZone zoneNumber="10" Name="Master Bed" groupNumber="2" />
+    <audioZone zoneNumber="11" Name="His Office" groupNumber="2" />
+    <audioZone zoneNumber="12" Name="Formal Dining" groupNumber="1" />
+    <audioZone zoneNumber="13" Name="Gallery" groupNumber="3" />
+    <audioZone zoneNumber="14" Name="Bath" groupNumber="3" />
+    <audioZone zoneNumber="15" Name="Library" groupNumber="1" />
+    <audioZone zoneNumber="16" Name="Formal Living" groupNumber="1" />
+    <audioZone zoneNumber="17" Name="Lounge" groupNumber="3" />
+    <audioZone zoneNumber="18" Name="Game Room" groupNumber="4" />
+    <audioZone zoneNumber="19" Name="Living Room" groupNumber="4" />
+    <audioZone zoneNumber="20" Name="Guest Living" groupNumber="4" />
+    <audioZone zoneNumber="21" Name="Family Room" groupNumber="1" />
+    <audioZone zoneNumber="22" Name="Dining Room" groupNumber="1" />
+    <audioZone zoneNumber="23" Name="Theater" groupNumber="3" />
+    <audioZone zoneNumber="24" Name="Landsape" groupNumber="1" />
+    <audioZone zoneNumber="25" Name="Landscape2" groupNumber="0" />
+    <audioZone zoneNumber="26" Name="Landscape3" groupNumber="0" />
+    <audioZone zoneNumber="27" Name="Guest Bedroom" groupNumber="4" />
+  </audioZones>
+  <groups>
+    <group groupNumber="1" Name="First Floor">
+      <zone zoneNumber="12" />
+      <zone zoneNumber="16" />
+      <zone zoneNumber="15" />
+      <zone zoneNumber="21" />
+      <zone zoneNumber="22" />
+      <zone zoneNumber="24" />
+      <zone zoneNumber="8" />
+      <zone zoneNumber="9" />
+    </group>
+    <group groupNumber="2" Name="Second Floor">
+      <zone zoneNumber="6" />
+      <zone zoneNumber="7" />
+      <zone zoneNumber="10" />
+      <zone zoneNumber="11" />
+      <zone zoneNumber="2" />
+      <zone zoneNumber="3" />
+    </group>
+    <group groupNumber="3" Name="Lower Floor">
+      <zone zoneNumber="5" />
+      <zone zoneNumber="23" />
+      <zone zoneNumber="13" />
+      <zone zoneNumber="17" />
+      <zone zoneNumber="14" />
+      <zone zoneNumber="4" />
+    </group>
+    <group groupNumber="2" Name="Guest House">
+      <zone zoneNumber="18" />
+      <zone zoneNumber="1" />
+      <zone zoneNumber="19" />
+      <zone zoneNumber="20" />
+      <zone zoneNumber="27" />
+    </group>
+  </groups>
+</AMP>

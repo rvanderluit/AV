@@ -1,0 +1,11 @@
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\AV.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\AV.pdb
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\Crestron.SimplSharpPro.DeviceSupport.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\Crestron.SimplSharpPro.EthernetCommunications.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\SimplSharpCustomAttributesInterface.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\SimplSharpHelperInterface.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\SimplSharpPro.exe
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\obj\Debug\AV.dll
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\obj\Debug\AV.pdb
+C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\Crestron.SimplSharpPro.AudioDistribution.dll
