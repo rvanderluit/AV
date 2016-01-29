@@ -406,7 +406,7 @@ namespace AV
         void zoneSelect(uint buttonNumber)
         {
             bool bit;
-            UIButtonNumberCalc UICalc = new UIButtonNumberCalc();//d
+            UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
             uint UINumber = UICalc.UINum(buttonNumber);
             int zoneNumber = Convert.ToInt32(UICalc.zoneNumber);//calculate zone number
             
