@@ -1,4 +1,4 @@
-﻿MainAssembly=AV.dll:70e45d1d0906c851140403fda3f8222e
+﻿MainAssembly=AV.dll:18eaaa379a8d34d532390131cdb635f8
 MainAssemblyMinFirmwareVersion=1.009.0029
 ü
 DependencySource=Crestron.SimplSharpPro.AudioDistribution.dll:671f7b0b0c960f1b5c8b58ae9c5ded6c
@@ -21,6 +21,6 @@ DependencySource=SimplSharpHelperInterface.dll:aed72eb0e19559a3f56708be76445dcd
 DependencyPath=AV.cpz:SimplSharpHelperInterface.dll
 DependencyMainAssembly=SimplSharpHelperInterface.dll:aed72eb0e19559a3f56708be76445dcd
 ü
-DependencySource=SimplSharpPro.exe:af194456f933d5fbffae954d8fbbadb0
+DependencySource=SimplSharpPro.exe:2de7c181bcf8dc8e82110dac3d9ab83c
 DependencyPath=AV.cpz:SimplSharpPro.exe
-DependencyMainAssembly=SimplSharpPro.exe:af194456f933d5fbffae954d8fbbadb0
+DependencyMainAssembly=SimplSharpPro.exe:2de7c181bcf8dc8e82110dac3d9ab83c

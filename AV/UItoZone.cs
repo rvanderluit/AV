@@ -54,11 +54,8 @@ namespace AV
         }
         public static bool[] zoneCurrentMuteStatus
         { 
-            get {return _zoneCurrentMuteStatus;}
-            set
-            {
-                _zoneCurrentMuteStatus = value;
-            }
+            get {return _zoneCurrentMuteStatus; }
+            set { _zoneCurrentMuteStatus = value; }
         }
         public static bool[] zoneCurrentOnOffStatus
         {

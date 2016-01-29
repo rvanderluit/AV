@@ -263,16 +263,15 @@ namespace AV
             {
                 
                 case ZoneEventIds.SourceFeedbackEventId:
-                    CrestronConsole.PrintLine("SourceFeedbackEventId {0} {1}", args.Zone.SourceFeedback.UShortValue, args.Zone.Source.UShortValue);
-                    myEISC.UShortInput[args.Zone.Number + 40].UShortValue = args.Zone.Source.UShortValue;
-                    UItoZone.zoneCurrentSources[args.Zone.Number] = sourceNameArray[args.Zone.Source.UShortValue];
-                    if (args.Zone.Source.UShortValue == 0)
+                    myEISC.UShortInput[args.Zone.Number + 40].UShortValue = args.Zone.Source.UShortValue;//UPDATE XSIG
+                    UItoZone.zoneCurrentSources[args.Zone.Number] = sourceNameArray[args.Zone.SourceFeedback.UShortValue];//UPDATE SOURCE TEXT
+                    if (args.Zone.SourceFeedback.UShortValue == 0)
                     {
-                        UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = false;
+                        UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = false;//ZONE IS OFF
                     }
-                    else UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = true;
+                    else {UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = true;//ZONE IS ON
+                    } 
                     updateUISources(args.Zone.Number);
-                    CrestronConsole.PrintLine("SourceFeedbackEventId {0}", args.EventId);
                     updateUIOnOffStatus(args.Zone.Number);
                     break;
                 case ZoneEventIds.VolumeFeedbackEventId:
@@ -381,13 +380,15 @@ namespace AV
                         UItoZone.groupMuteStatus[i, j] = UItoZone.zoneCurrentMuteStatus[UItoZone.zoneNumbersInGroups[i, j]];
                         for (int k = 0; k < 20; k++)
                         {
-                            myEISC.BooleanInput[(ushort)(1301 + k*20 + j)].BoolValue = UItoZone.groupMuteStatus[i, j];
+                            CrestronConsole.PrintLine("mutestatus {0}", UItoZone.groupMuteStatus[i, j]);
+                            myEISC.BooleanInput[(ushort)(1301 + k * 20 + j)].BoolValue = UItoZone.groupMuteStatus[i, j];//UPDATE XSIG
                         }
                     }
                 }
             }
         }
         void updateUIOnOffStatus(uint callingZone){
+            //CrestronConsole.PrintLine("onoffstatus called {0}", callingZone);
             for (int i = 0; i < UItoZone.numberOfGroups; i++)
             {
                 for (int j = 0; j < UItoZone.groupSizes[i]; j++)
@@ -397,7 +398,9 @@ namespace AV
                         UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
                         for (int k = 0; k < 20; k++)
                         {
-                            myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];
+                            //CrestronConsole.PrintLine("onoffstatus {0}", (1701 + k * 20 + j));
+                            CrestronConsole.PrintLine("daaa {0}", UItoZone.groupOnOffStatus[i, j]);
+                            myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];//UPDATE XSIG
                         }
                     }
                 }
@@ -692,7 +695,7 @@ namespace AV
                 {
                     swampA.Zones[output].Source.UShortValue = sourceNumber;
                 }
-                else if (output < 11) {
+                else if (output < 11) {//SEND TO SPDIF
                     swampA.SpdifOuts[output].SPDIFOutSource.UShortValue = sourceNumber;
                 }
 
