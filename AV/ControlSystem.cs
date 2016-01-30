@@ -215,15 +215,16 @@ namespace AV
                 {
                     swampA.Zones[i].Name.StringValue = zoneNameArray[i - 1];
                 }
+                for (ushort i = 1; i < 25; i++) {
+                    swampA.Sources[i].Name.StringValue = sourceNameArray[i];
+                }
                 if (numberOfExpanders > 0)
                 {
-                CrestronConsole.PrintLine("swampA.Expanders.Count > {0}", swampA.Expanders.Count);
                 ushort zonePlaceHolder = 10;
                 for (ushort i = 1; i < numberOfExpanders; i++)
                     {
                     if (swampA.Expanders[i].OnlineFeedback)
                         {
-                        CrestronConsole.PrintLine("swampA.Expanders[i].OnlineFeedback");
                         for (ushort j = 1; j < swampA.Expanders[i].NumberOfZones; j++)
                             {swampA.Expanders[i].Zones[j].Name.StringValue = zoneNameArray[zonePlaceHolder + j-1];}
                         }
@@ -252,13 +253,11 @@ namespace AV
                 UItoZone.zoneCurrentOnOffStatus[callingZone] = false;
             }
             else UItoZone.zoneCurrentOnOffStatus[callingZone] = true;
-            updateUISources(callingZone);
-            updateUIOnOffStatus(callingZone);
+            updateUI(callingZone, "sources");
+            updateUI(callingZone, "onOffStatus");
         }
         void SwampZoneEvent(Object device, ZoneEventArgs args)
         {
-
-            //CrestronConsole.PrintLine("SWAMPZONEEVENT {0}", args.EventId);
             switch (args.EventId)
             {
                 
@@ -271,17 +270,17 @@ namespace AV
                     }
                     else {UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = true;//ZONE IS ON
                     } 
-                    updateUISources(args.Zone.Number);
-                    updateUIOnOffStatus(args.Zone.Number);
+                    updateUI(args.Zone.Number, "sources");
+                    updateUI(args.Zone.Number, "onOffStatus");
                     break;
                 case ZoneEventIds.VolumeFeedbackEventId:
                     myEISC.UShortInput[args.Zone.Number + 100].UShortValue = args.Zone.VolumeFeedback.UShortValue;
                     UItoZone.zoneCurrentVolumes[args.Zone.Number] = args.Zone.VolumeFeedback.UShortValue;
-                    updateUIVolumes(args.Zone.Number); 
+                    updateUI(args.Zone.Number, "volumes");
                     break;
                 case ZoneEventIds.MuteOnFeedbackEventId:
                     UItoZone.zoneCurrentMuteStatus[args.Zone.Number] = args.Zone.MuteOnFeedback.BoolValue;
-                    updateUIMuteStatus(args.Zone.Number);
+                    updateUI(args.Zone.Number, "muteStatus");
                     break; 
 
                 default:
@@ -303,17 +302,17 @@ namespace AV
                         UItoZone.zoneCurrentOnOffStatus[callingZone] = false;
                     }
                     else UItoZone.zoneCurrentOnOffStatus[callingZone] = true;
-                    updateUISources(callingZone);
-                    updateUIOnOffStatus(callingZone);
+                    updateUI(callingZone, "sources");
+                    updateUI(callingZone, "onOffStatus");
                     break;
                 case ZoneEventIds.VolumeFeedbackEventId:
                     myEISC.UShortInput[callingZone + 100].UShortValue = args.Zone.VolumeFeedback.UShortValue;
                     UItoZone.zoneCurrentVolumes[callingZone] = args.Zone.VolumeFeedback.UShortValue;
-                    updateUIVolumes(callingZone);
+                    updateUI(callingZone, "volumes");
                     break;
                 case ZoneEventIds.MuteOnFeedbackEventId:
                     UItoZone.zoneCurrentMuteStatus[callingZone] = args.Zone.MuteOnFeedback.BoolValue;
-                    updateUIMuteStatus(callingZone);
+                    updateUI(callingZone, "muteStatus");
                     break;
                     
                 default:
@@ -340,67 +339,58 @@ namespace AV
                 swampA.Zones[output].Source.UShortValue = input;
             }
         }
-        void updateUIVolumes(uint callingZone)
+        void updateUI(uint callingZone, string propertyToUpdate)
         {
-            for (int i = 0; i < UItoZone.numberOfGroups; i++) {
-                for (int j = 0; j < UItoZone.groupSizes[i]; j++) {
-                    if (callingZone == UItoZone.zoneNumbersInGroups[i, j]) {
-                        UItoZone.groupVolumes[i, j] = UItoZone.zoneCurrentVolumes[UItoZone.zoneNumbersInGroups[i, j]];
-                        for (int k = 0; k < 20; k++)//UPDATE TO TEST IF UI IS CURRENTLY ON AUDIO MENU
-                        {
-                            myEISC.UShortInput[(ushort)(201 + (k*20)+ j)].UShortValue = UItoZone.groupVolumes[i, j];
-                        }
-                    }
-                }
-            }
-        }
-        void updateUISources(uint callingZone) 
-        {
-            for (int i = 0; i < UItoZone.numberOfGroups; i++) {
-                for (int j = 0; j < UItoZone.groupSizes[i]; j++) {
-                    if (callingZone == UItoZone.zoneNumbersInGroups[i, j]) {
-                        UItoZone.groupSources[i, j] = UItoZone.zoneCurrentSources[UItoZone.zoneNumbersInGroups[i, j]];
-                        UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
-                        for (int k = 0; k < 20; k++)//UPDATE TO TEST IF UI IS CURRENTLY ON AUDIO MENU
-                        {
-                            myEISC.StringInput[(ushort)(401 + k*20 + j)].StringValue = UItoZone.groupSources[i, j];
-                            myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];
-                        }
-                    }
-                }
-            }
-        }
-        void updateUIMuteStatus(uint callingZone) {
-            for (int i = 0; i < UItoZone.numberOfGroups; i++)
-            {
-                for (int j = 0; j < UItoZone.groupSizes[i]; j++)
-                {
+            for (int i = 0; i < UItoZone.numberOfGroups; i++){
+                for (int j = 0; j < UItoZone.groupSizes[i]; j++){
                     if (callingZone == UItoZone.zoneNumbersInGroups[i, j])
                     {
-                        UItoZone.groupMuteStatus[i, j] = UItoZone.zoneCurrentMuteStatus[UItoZone.zoneNumbersInGroups[i, j]];
-                        for (int k = 0; k < 20; k++)
+                        switch (propertyToUpdate)
                         {
-                            CrestronConsole.PrintLine("mutestatus {0}", UItoZone.groupMuteStatus[i, j]);
-                            myEISC.BooleanInput[(ushort)(1301 + k * 20 + j)].BoolValue = UItoZone.groupMuteStatus[i, j];//UPDATE XSIG
-                        }
-                    }
-                }
-            }
-        }
-        void updateUIOnOffStatus(uint callingZone){
-            //CrestronConsole.PrintLine("onoffstatus called {0}", callingZone);
-            for (int i = 0; i < UItoZone.numberOfGroups; i++)
-            {
-                for (int j = 0; j < UItoZone.groupSizes[i]; j++)
-                {
-                    if (callingZone == UItoZone.zoneNumbersInGroups[i, j])
-                    {
-                        UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
-                        for (int k = 0; k < 20; k++)
-                        {
-                            //CrestronConsole.PrintLine("onoffstatus {0}", (1701 + k * 20 + j));
-                            CrestronConsole.PrintLine("daaa {0}", UItoZone.groupOnOffStatus[i, j]);
-                            myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];//UPDATE XSIG
+                            case "muteStatus":
+                                {
+                                    UItoZone.groupMuteStatus[i, j] = UItoZone.zoneCurrentMuteStatus[UItoZone.zoneNumbersInGroups[i, j]];
+                                    for (int k = 0; k < 20; k++)
+                                    {
+                                        myEISC.BooleanInput[(ushort)(1301 + k * 20 + j)].BoolValue = UItoZone.groupMuteStatus[i, j];//UPDATE XSIG
+                                    }
+                                }
+                                break;
+                            case "onOffStatus":
+                                {
+                                    UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
+                                    for (int k = 0; k < 20; k++)
+                                    {
+                                        myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];//UPDATE XSIG
+                                    }
+                                }
+                                break;
+                            case "sources": 
+                                {
+                                    UItoZone.groupSources[i, j] = UItoZone.zoneCurrentSources[UItoZone.zoneNumbersInGroups[i, j]];
+                                    UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
+                                    for (int k = 0; k < 20; k++)//UPDATE TO TEST IF UI IS CURRENTLY ON AUDIO MENU
+                                    {
+                                        myEISC.StringInput[(ushort)(401 + k * 20 + j)].StringValue = UItoZone.groupSources[i, j];
+                                        myEISC.BooleanInput[(ushort)(1701 + k * 20 + j)].BoolValue = UItoZone.groupOnOffStatus[i, j];
+                                    }
+                                }
+                                break;
+                            case "volumes":
+                                {
+                                    if (callingZone == UItoZone.zoneNumbersInGroups[i, j])
+                                    {
+                                        UItoZone.groupVolumes[i, j] = UItoZone.zoneCurrentVolumes[UItoZone.zoneNumbersInGroups[i, j]];
+                                        for (int k = 0; k < 20; k++)//UPDATE TO TEST IF UI IS CURRENTLY ON AUDIO MENU
+                                        {
+                                            myEISC.UShortInput[(ushort)(201 + (k * 20) + j)].UShortValue = UItoZone.groupVolumes[i, j];
+                                        }
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+
                         }
                     }
                 }
@@ -418,7 +408,6 @@ namespace AV
                 currentZone[UINumber - 1].zoneSelectButtons ^= 1 << zoneNumber;//toggle bit 
                 bit = (currentZone[UINumber - 1].zoneSelectButtons & (1 << zoneNumber)) != 0;//check bit
                 myEISC.BooleanInput[Convert.ToUInt16((UINumber - 1) * 20) + (uint)zoneNumber].BoolValue = bit;//update button fb
-                //CrestronConsole.PrintLine("bit zoneNumber UINumber buttonNumber {0} {1} {2} {3}", bit, zoneNumber, UINumber, buttonNumber);
             }
             else //singlezone mode
             {
@@ -684,7 +673,6 @@ namespace AV
             uint UINumber = UICalc.UINum(buttonNum);
             uint zoneNumber = UICalc.zoneNumber;
             ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber - 1];
-            //CrestronConsole.PrintLine("SENDOFF {0}", output);
             sourcer(output, 0);
         }
         void sourcer(ushort output, ushort sourceNumber) {
