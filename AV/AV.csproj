@@ -77,7 +77,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlSystem.cs" />
+    <Compile Include="partyModes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="timer.cs" />
     <Compile Include="UI-ButtonNumberCalc.cs" />
     <Compile Include="UItoZone.cs" />
     <None Include="Properties\ControlSystem.cfg" />
@@ -91,7 +93,7 @@
         <Programmer />
         <ArchiveFilename>C:\Users\robert\Documents\Visual Studio 2008\Projects\AV\AV\bin\AV.cpz</ArchiveFilename>
         <MinFirmwareVersion>1.009.0029</MinFirmwareVersion>
-        <CompiledOn>1/29/2016 4:01:32 PM</CompiledOn>
+        <CompiledOn>2/18/2016 5:26:11 PM</CompiledOn>
         <AdditionalInfo />
         <EmbedSourceArchive>False</EmbedSourceArchive>
         <CopyTo />

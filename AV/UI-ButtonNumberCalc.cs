@@ -64,6 +64,11 @@ namespace AV
                 UIresult = UIfromBtn(buttonNum);
                 zoneNumber = zoneNum(buttonNum);
             }
+            else if (buttonNum >= 2301 && buttonNum <= 2700) {
+                buttonNum -= 2300;
+                UIresult = UIfromBtn(buttonNum);
+                zoneNumber = zoneNum(buttonNum);
+            }
             else UIresult = buttonNum;
 
             return UIresult;

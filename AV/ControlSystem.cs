@@ -1,6 +1,7 @@
-﻿//Please uncomment the #define line below if you want to include the sample code 
-// in the compiled output.
-// for the sample to work, you'll have to add a reference to the SimplSharpPro.UI dll to your project.
+﻿//TO DO:
+//add fault feedback
+//add snapshot for party modes
+//change the way expanders are defined, research dictionary
 //#define IncludeSampleCode
 
 using System;
@@ -15,20 +16,19 @@ using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharp.CrestronXml;
 using Crestron.SimplSharpPro.AudioDistribution;
 
-
 namespace AV
 {
     //public delegate EventHandler(object sender, EventArgs e);
-    
-    public delegate void volumeRoutingHandler();
+
+    public delegate void volumeRoutingHandler();//??DELETe?
 
 
     public class ControlSystem : CrestronControlSystem
     {
         ushort[] zoneNumberArray = new ushort[75];//??? is this necessary?
-        
-        public event volumeRoutingHandler volumeRoutingEvent;
-        
+
+        public event volumeRoutingHandler volumeRoutingEvent;//clean up?
+        SimplSharpTimer pressHold = new SimplSharpTimer();
         string[] zoneNameArray = new string[75];
         string[] sourceNameArray = new string[75];
         string[] swampExpanderTypes = new string[10];
@@ -48,16 +48,18 @@ namespace AV
         SwampE4[] expanderE4 = new SwampE4[8];
         Swe8[] expanderSWE8 = new Swe8[8];
         ZoneEventHandler[] zoneEventHandlerz = new ZoneEventHandler[8];
-        Dictionary<SwampE8, int> expand = new Dictionary<SwampE8, int>();
-        
-        public void triggerEventHandler() { //NOT FINISHED!!
+        Dictionary<SwampE8, int> expand = new Dictionary<SwampE8, int>();//DELETE?????
+        partyModes partyModeSettings = new partyModes();
+        public void triggerEventHandler()
+        { //NOT FINISHED!!
             volumeRoutingEvent();
         }
 
         public ControlSystem()
             : base()
         {
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 20; i++)
+            {
                 currentZone[i] = new UItoZone();
             }
             //currentZone[0].volumeRoutingEvent += new UItoZone.volumeRoutingHandler(UItoZone.routeVolumeToUI);
@@ -78,10 +80,12 @@ namespace AV
                 if (swampA.Register() != eDeviceRegistrationUnRegistrationResponse.Success)
                     ErrorLog.Error("SWAMP failed registration {0}", swampA.RegistrationFailureReason);
             }
-            for (ushort i = 0; i < 5; i++) {
+            for (ushort i = 0; i < 5; i++)
+            {
                 myEISC.StringInput[(ushort)(801 + i)].StringValue = groupNames[i];
             }
-            for (ushort i = 1; i <= 24; i++) {
+            for (ushort i = 1; i <= 24; i++)
+            {
                 myEISC.StringInput[(ushort)(810 + i)].StringValue = sourceNameArray[i];
             }
 
@@ -112,7 +116,6 @@ namespace AV
                         case "swampE8":
                             numberOfSwampE8++;
                             maxNumberOfZones += 8;
-                            
                             expanderE8[i] = new SwampE8(expanderIDs[i], swampA);
                             expanderE8[i].ZoneChangeEvent += new ZoneEventHandler(E8ZoneEvent);
                             //expand.Add(expanderE8[i], i);
@@ -167,7 +170,7 @@ namespace AV
                 if (args.Sig.Number <= 40 && args.Sig.Number > 20) { sendSource(args.Sig.Number, args.Sig.UShortValue); }
                 if (args.Sig.Number == 100) { swampIO(2, args.Sig.UShortValue); }//in, out
             }
-            
+
             if (args.Event == eSigEvent.BoolChange)
             {
                 if (args.Sig.Number <= 400)
@@ -177,7 +180,7 @@ namespace AV
                         zoneSelect(args.Sig.Number);
                     }
                 }
-                else if (args.Sig.Number > 400 &&  args.Sig.Number <= 440 )// Master volume up/dowon
+                else if (args.Sig.Number > 400 && args.Sig.Number <= 440)// Master volume up/dowon
                 {
                     masterVolume(args.Sig.Number, args.Sig.BoolValue);
                 }
@@ -185,14 +188,17 @@ namespace AV
                 {
                     mute(args.Sig.Number);
                 }
-                else if (args.Sig.Number > 500 && args.Sig.Number <= 1300 ) { //individual vol up/down
+                else if (args.Sig.Number > 500 && args.Sig.Number <= 1300)
+                { //individual vol up/down
                     singleVolUpDown(args.Sig.Number, args.Sig.BoolValue);
                 }
-                else if (args.Sig.Number > 1300 && args.Sig.Number <= 1700 && args.Sig.BoolValue == true) {//individual mute
+                else if (args.Sig.Number > 1300 && args.Sig.Number <= 1700 && args.Sig.BoolValue == true)
+                {//individual mute
                     mute(args.Sig.Number);
                 }
-                else if (args.Sig.Number > 1700 && args.Sig.Number <= 2100 && args.Sig.BoolValue == true) {//individual off
-                    
+                else if (args.Sig.Number > 1700 && args.Sig.Number <= 2100 && args.Sig.BoolValue == true)
+                {//individual off
+
                     sendOff(args.Sig.Number);
                 }
                 else if (args.Sig.Number > 2100 && args.Sig.Number < 2200 && args.Sig.BoolValue == true) //select / deselect all
@@ -203,37 +209,58 @@ namespace AV
                 {
                     groupUngroup(args.Sig.Number, args.Sig.BoolValue);
                 }
-                else if (args.Sig.Number > 2250 && args.Sig.Number < 2300) {
-                    onMusicMenu(args.Sig.Number, args.Sig.BoolValue);
+                else if (args.Sig.Number > 2230 && args.Sig.Number < 2235)
+                {
+                    //pressHold.presetNum = (ushort)(args.Sig.Number - 2230);
+                    //pressAndHold(args.Sig.BoolValue);
+                    saveCurrentStatus(args.Sig.Number - 2230);
+                }
+                else if (args.Sig.Number > 2234 && args.Sig.Number < 2238)
+                {
+                    if (args.Sig.BoolValue == true)
+                    {
+                        recallPartyMode(args.Sig.Number - 2234);
+                    }
+                }
+                else if (args.Sig.Number > 2250 && args.Sig.Number < 2300)
+                {
+                    onMusicMenu(args.Sig.Number, args.Sig.BoolValue);//THIS NEEDS UPDATING!!!!!!!
+                }
+                else if (args.Sig.Number > 2300 && args.Sig.Number < 2700)
+                {
+                    pressAndHold(args.Sig.Number, args.Sig.BoolValue);
                 }
             }
         }
         void swampA_OnlineStatusChange(GenericBase currentDevice, OnlineOfflineEventArgs args)
         {
-            if (swampA.IsOnline) {
+            if (swampA.IsOnline)
+            {
                 for (ushort i = 1; i < 9; i++)
                 {
                     swampA.Zones[i].Name.StringValue = zoneNameArray[i - 1];
                 }
-                for (ushort i = 1; i < 25; i++) {
+                for (ushort i = 1; i < 25; i++)
+                {
                     swampA.Sources[i].Name.StringValue = sourceNameArray[i];
                 }
                 if (numberOfExpanders > 0)
                 {
-                ushort zonePlaceHolder = 10;
-                for (ushort i = 1; i < numberOfExpanders; i++)
+                    ushort zonePlaceHolder = 10;
+                    for (ushort i = 1; i < numberOfExpanders; i++)
                     {
-                    if (swampA.Expanders[i].OnlineFeedback)
+                        if (swampA.Expanders[i].OnlineFeedback)
                         {
-                        for (ushort j = 1; j < swampA.Expanders[i].NumberOfZones; j++)
-                            {swampA.Expanders[i].Zones[j].Name.StringValue = zoneNameArray[zonePlaceHolder + j-1];}
+                            for (ushort j = 1; j < swampA.Expanders[i].NumberOfZones; j++)
+                            { swampA.Expanders[i].Zones[j].Name.StringValue = zoneNameArray[zonePlaceHolder + j - 1]; }
                         }
-                    zonePlaceHolder += (ushort)swampA.Expanders[i].NumberOfZones;//NEEDS TESTING
+                        zonePlaceHolder += (ushort)swampA.Expanders[i].NumberOfZones;//NEEDS TESTING
                     }
                 }
             }
         }
-        void swampBaseEvent(GenericBase device, BaseEventArgs args){
+        void swampBaseEvent(GenericBase device, BaseEventArgs args)
+        {
             uint callingZone = 0;
             switch (args.EventId)
             {
@@ -246,8 +273,9 @@ namespace AV
                 default:
                     break;
             }
-            myEISC.UShortInput[40+callingZone].UShortValue = swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue;
-            UItoZone.zoneCurrentSources[callingZone] = sourceNameArray[swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue];
+            myEISC.UShortInput[40 + callingZone].UShortValue = swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue;
+            UItoZone.zoneCurrentSourceNumber[callingZone] = swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue;
+            UItoZone.zoneCurrentSourceText[callingZone] = sourceNameArray[swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue];
             if (swampA.SpdifOuts[callingZone].SPDIFOutSourceFeedback.UShortValue == 0)
             {
                 UItoZone.zoneCurrentOnOffStatus[callingZone] = false;
@@ -260,16 +288,20 @@ namespace AV
         {
             switch (args.EventId)
             {
-                
+
                 case ZoneEventIds.SourceFeedbackEventId:
                     myEISC.UShortInput[args.Zone.Number + 40].UShortValue = args.Zone.Source.UShortValue;//UPDATE XSIG
-                    UItoZone.zoneCurrentSources[args.Zone.Number] = sourceNameArray[args.Zone.SourceFeedback.UShortValue];//UPDATE SOURCE TEXT
+                    UItoZone.zoneCurrentSourceNumber[args.Zone.Number] = args.Zone.Source.UShortValue;//UPDATE ZONE STATUS
+                    UItoZone.zoneCurrentSourceText[args.Zone.Number] = sourceNameArray[args.Zone.SourceFeedback.UShortValue];//UPDATE SOURCE TEXT
+
                     if (args.Zone.SourceFeedback.UShortValue == 0)
                     {
                         UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = false;//ZONE IS OFF
                     }
-                    else {UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = true;//ZONE IS ON
-                    } 
+                    else
+                    {
+                        UItoZone.zoneCurrentOnOffStatus[args.Zone.Number] = true;//ZONE IS ON
+                    }
                     updateUI(args.Zone.Number, "sources");
                     updateUI(args.Zone.Number, "onOffStatus");
                     break;
@@ -281,22 +313,35 @@ namespace AV
                 case ZoneEventIds.MuteOnFeedbackEventId:
                     UItoZone.zoneCurrentMuteStatus[args.Zone.Number] = args.Zone.MuteOnFeedback.BoolValue;
                     updateUI(args.Zone.Number, "muteStatus");
-                    break; 
-
+                    break;
+                case ZoneEventIds.StartupVolumeFeedbackEventId:
+                    UItoZone.zoneCurrentStartupVols[args.Zone.Number] = args.Zone.StartupVolumeFeedback.UShortValue;
+                    decimal vol = args.Zone.StartupVolumeFeedback.UShortValue;
+                    CrestronConsole.PrintLine("startupVolFB {0} {1:P} ", args.Zone.Number, vol / 65535);
+                    break;
+                case ZoneEventIds.OverCurrentFeedbackEventId:
+                    myEISC.StringInput[810].StringValue = "Over Current Zone " + args.Zone.Number;
+                    break;
+                case ZoneEventIds.OverOrUnderVoltageFeedbackEventId:
+                    myEISC.StringInput[810].StringValue = "Over / Under Voltage " + args.Zone.Number;
+                    break;
                 default:
                     break;
             }
         }
-        void E8ZoneEvent(Object device, ZoneEventArgs args) {
+        void E8ZoneEvent(Object device, ZoneEventArgs args)
+        {
             var ex = device as SwampE8;
             string deviceString = Convert.ToString(ex.ExpanderType);
             uint expNum = ex.Number;
             uint callingZone = (args.Zone.Number + (ushort)(expanderFirstZone[expNum - 1]) - 1);
-            switch (args.EventId) { 
-                
+            switch (args.EventId)
+            {
+
                 case ZoneEventIds.SourceFeedbackEventId:
                     myEISC.UShortInput[callingZone + 40].UShortValue = args.Zone.Source.UShortValue;
-                    UItoZone.zoneCurrentSources[callingZone] = sourceNameArray[args.Zone.Source.UShortValue];
+                    UItoZone.zoneCurrentSourceNumber[callingZone] = args.Zone.Source.UShortValue;//UPDATE ZONE STATUS
+                    UItoZone.zoneCurrentSourceText[callingZone] = sourceNameArray[args.Zone.Source.UShortValue];
                     if (args.Zone.Source.UShortValue == 0)
                     {
                         UItoZone.zoneCurrentOnOffStatus[callingZone] = false;
@@ -314,7 +359,11 @@ namespace AV
                     UItoZone.zoneCurrentMuteStatus[callingZone] = args.Zone.MuteOnFeedback.BoolValue;
                     updateUI(callingZone, "muteStatus");
                     break;
-                    
+                case ZoneEventIds.StartupVolumeFeedbackEventId:
+                    UItoZone.zoneCurrentStartupVols[callingZone] = args.Zone.StartupVolumeFeedback.UShortValue;
+                    decimal vol = args.Zone.StartupVolumeFeedback.UShortValue;
+                    CrestronConsole.PrintLine("startupVolFB {0} {1:P} ", callingZone, vol / 65535);
+                    break;
                 default:
                     break;
             }
@@ -324,16 +373,22 @@ namespace AV
             var ex = device as SwampE4;
             string deviceString = Convert.ToString(ex.ExpanderType);
             uint expNum = ex.Number;
+            uint callingZone = (args.Zone.Number + (ushort)(expanderFirstZone[expNum - 1]) - 1);
             switch (args.EventId)
             {
                 case ZoneEventIds.SourceFeedbackEventId:
                     myEISC.UShortInput[args.Zone.Number + 39 + (ushort)(expanderFirstZone[expNum - 1])].UShortValue = args.Zone.Source.UShortValue;
+                    UItoZone.zoneCurrentSourceNumber[callingZone] = args.Zone.Source.UShortValue;//UPDATE ZONE STATUS
+                    break;
+                case ZoneEventIds.StartupVolumeFeedbackEventId:
+                    UItoZone.zoneCurrentStartupVols[callingZone] = args.Zone.StartupVolumeFeedback.UShortValue;
                     break;
                 default:
                     break;
             }
         }
-        void swampIO(ushort input, ushort output) {
+        void swampIO(ushort input, ushort output)
+        {
             if (input < 25)
             {
                 swampA.Zones[output].Source.UShortValue = input;
@@ -341,8 +396,10 @@ namespace AV
         }
         void updateUI(uint callingZone, string propertyToUpdate)
         {
-            for (int i = 0; i < UItoZone.numberOfGroups; i++){
-                for (int j = 0; j < UItoZone.groupSizes[i]; j++){
+            for (int i = 0; i < UItoZone.numberOfGroups; i++)
+            {
+                for (int j = 0; j < UItoZone.groupSizes[i]; j++)
+                {
                     if (callingZone == UItoZone.zoneNumbersInGroups[i, j])
                     {
                         switch (propertyToUpdate)
@@ -365,9 +422,9 @@ namespace AV
                                     }
                                 }
                                 break;
-                            case "sources": 
+                            case "sources":
                                 {
-                                    UItoZone.groupSources[i, j] = UItoZone.zoneCurrentSources[UItoZone.zoneNumbersInGroups[i, j]];
+                                    UItoZone.groupSources[i, j] = UItoZone.zoneCurrentSourceText[UItoZone.zoneNumbersInGroups[i, j]];
                                     UItoZone.groupOnOffStatus[i, j] = UItoZone.zoneCurrentOnOffStatus[UItoZone.zoneNumbersInGroups[i, j]];
                                     for (int k = 0; k < 20; k++)//UPDATE TO TEST IF UI IS CURRENTLY ON AUDIO MENU
                                     {
@@ -402,7 +459,7 @@ namespace AV
             UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
             uint UINumber = UICalc.UINum(buttonNumber);
             int zoneNumber = Convert.ToInt32(UICalc.zoneNumber);//calculate zone number
-            
+
             if (groupUngroupArray[UINumber])//multizone mode
             {
                 currentZone[UINumber - 1].zoneSelectButtons ^= 1 << zoneNumber;//toggle bit 
@@ -419,11 +476,11 @@ namespace AV
                 }
             }
         }
-        void masterVolume(uint buttonNum, bool pressRelease) 
+        void masterVolume(uint buttonNum, bool pressRelease)
         {
             double VolumeRampSeconds = 700;//X10ms
             double rampTime;
-            ushort exp=1;
+            ushort exp = 1;
             UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
             uint UINumber = UICalc.UINum(buttonNum);
             bool volUp = UICalc.VOLUP;
@@ -442,10 +499,10 @@ namespace AV
                         rampTime = ((double)UItoZone.zoneCurrentVolumes[output]) * VolumeRampSeconds / 65535;
                     }
                     if (output > 0 && output < 9)//SWAMP24X8
-                    {      
+                    {
                         if (pressRelease)
                         {
-                            if(swampA.Zones[output].SourceFeedback.UShortValue != 0)
+                            if (swampA.Zones[output].SourceFeedback.UShortValue != 0)
                             {
                                 swampA.Zones[output].MuteOff();
                                 swampA.Zones[output].Volume.UShortValue = UItoZone.zoneCurrentVolumes[output];
@@ -457,13 +514,14 @@ namespace AV
                             swampA.Zones[output].Volume.StopRamp();
                         }
                     }
-                    else if (output >= 11) {
-                        ushort expOutput=(ushort)(output+1);//calculate expander zone
+                    else if (output >= 11)
+                    {
+                        ushort expOutput = (ushort)(output + 1);//calculate expander zone
                         for (int j = 0; j < numberOfExpanders; j++)
                         {
                             if (output <= expanderLastZone[j])
                             {
-                                exp = (ushort)(j+1);//expander number
+                                exp = (ushort)(j + 1);//expander number
                                 expOutput -= (ushort)expanderFirstZone[j];
                                 break;
                             }
@@ -496,7 +554,7 @@ namespace AV
             ushort rampValue = UICalc.ramp;//0 or 65535
             uint zoneNumber = UICalc.zoneNumber;//calculate zone number
 
-            ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber-1];
+            ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber - 1];
             if (volUp)
             {
                 rampTime = (65535 - (double)UItoZone.zoneCurrentVolumes[output]) * VolumeRampSeconds / 65535;//set relative ramping time
@@ -523,16 +581,7 @@ namespace AV
             }
             else if (output >= 11)//send to expander
             {
-                ushort expOutput = (ushort)(output + 1);//calculate expander zone
-                for (int j = 0; j < numberOfExpanders; j++)
-                {
-                    if (output <= expanderLastZone[j])
-                    {
-                        exp = (ushort)(j + 1);//expander number
-                        expOutput -= (ushort)expanderFirstZone[j];
-                        break;
-                    }
-                }
+                ushort expOutput = calculateExpanderOutput(output);
                 if (pressRelease)
                 {
                     if (swampA.Expanders[exp].Zones[expOutput].SourceFeedback.UShortValue != 0)
@@ -548,11 +597,13 @@ namespace AV
                 }
             }
         }
-        void groupUngroup(uint buttonNum, bool boolValue) {
+        void groupUngroup(uint buttonNum, bool boolValue)
+        {
             buttonNum -= 2200;
             currentZone[buttonNum - 1].zoneSelectButtons = 0;//clear zone feedback 
             groupUngroupArray[buttonNum] = boolValue;
-            for (uint i = 0; i < 20; i++) {
+            for (uint i = 0; i < 20; i++)
+            {
                 myEISC.BooleanInput[(buttonNum - 1) * 20 + i + 1].BoolValue = false;
             }
         }
@@ -571,18 +622,21 @@ namespace AV
                 currentZone[UINumber - 1].zoneSelectButtons = 2097150;//set all bits
                 for (uint i = 0; i < 20; i++)
                 {
-                    myEISC.BooleanInput[(UINumber-1) * 20 + i + 1].BoolValue = true;
+                    myEISC.BooleanInput[(UINumber - 1) * 20 + i + 1].BoolValue = true;
                 }
             }
-            else { //deselect all
+            else
+            { //deselect all
                 UINumber = buttonNum - 50;
-                currentZone[UINumber-1].zoneSelectButtons = 0;
-                for (uint i = 0; i < 20; i++) {
-                    myEISC.BooleanInput[(UINumber-1) * 20 + i + 1].BoolValue = false;
+                currentZone[UINumber - 1].zoneSelectButtons = 0;
+                for (uint i = 0; i < 20; i++)
+                {
+                    myEISC.BooleanInput[(UINumber - 1) * 20 + i + 1].BoolValue = false;
                 }
             }
         }
-        void mute(uint buttonNum) {
+        void mute(uint buttonNum)
+        {
             UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
             uint UINumber = UICalc.UINum(buttonNum);
             uint zoneNumber = UICalc.zoneNumber;
@@ -598,16 +652,19 @@ namespace AV
                     }
                 }
             }
-            else {
-                ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber-1];//select zone number to send source to
-                muter(output); }
+            else
+            {
+                ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber - 1];//select zone number to send source to
+                muter(output);
+            }
             for (ushort i = 1; i < 9; i++)
             {
-                swampA.Zones[i].Name.StringValue = zoneNameArray[i-1];
+                swampA.Zones[i].Name.StringValue = zoneNameArray[i - 1];
                 //swampA.Expanders[i].Zones[i].Name.StringValue = zoneNameArray[i - 1];
             }
         }
-        void muter(ushort output) {
+        void muter(ushort output)
+        {
             ushort exp;
             if (output > 0)
             {
@@ -619,7 +676,7 @@ namespace AV
                     }
                     else swampA.Zones[output].MuteOn();
                 }
-                else if (output >=11)//Send to expander
+                else if (output >= 11)//Send to expander
                 {
                     for (exp = 0; exp < numberOfExpanders; exp++)
                     {
@@ -641,15 +698,15 @@ namespace AV
         }
         void floorSelect(uint UINumber, uint floorNumber)
         {
-            uint size= UItoZone.groupSizes[floorNumber - 1];
+            uint size = UItoZone.groupSizes[floorNumber - 1];
             myEISC.UShortInput[UINumber].UShortValue = (ushort)size;//CURRENT PAGE SIZE TO XSIG
-            currentZone[UINumber-1].currentGroupNumber = Convert.ToInt32(floorNumber);//update class group number
+            currentZone[UINumber - 1].currentGroupNumber = Convert.ToInt32(floorNumber);//update class group number
             currentZone[UINumber - 1].zoneSelectButtons = 0; //clear zone buttons when new floor selected
             for (uint i = 0; i < size; i++) //send room names/volumes/sources to xsig
             {
                 myEISC.StringInput[(UINumber - 1) * 20 + i + 1].StringValue = zoneNameArray[UItoZone.zoneNumbersInGroups[floorNumber - 1, i] - 1];
                 myEISC.StringInput[(UINumber - 1) * 20 + i + 401].StringValue = UItoZone.groupSources[currentZone[UINumber - 1].currentGroupNumber - 1, i];
-                myEISC.BooleanInput[(UINumber-1 ) * 20 + i + 1].BoolValue = false;
+                myEISC.BooleanInput[(UINumber - 1) * 20 + i + 1].BoolValue = false;
                 myEISC.BooleanInput[(UINumber - 1) * 20 + i + 1701].BoolValue = UItoZone.groupOnOffStatus[currentZone[UINumber - 1].currentGroupNumber - 1, i];
                 myEISC.UShortInput[(UINumber - 1) * 20 + i + 201].UShortValue = UItoZone.groupVolumes[currentZone[UINumber - 1].currentGroupNumber - 1, i];
             }
@@ -657,25 +714,27 @@ namespace AV
         void sendSource(uint UINumber, ushort sourceNumber)
         {
             UINumber -= 20;//starts at analog in 20
-            for (int i = 0; i < (currentZone[UINumber-1].currentGroupSize); i++)//test all zones in group
+            for (int i = 0; i < (currentZone[UINumber - 1].currentGroupSize); i++)//test all zones in group
             {
-                if ((currentZone[UINumber-1].zoneSelectButtons & (1 << (i + 1))) != 0)//if zone is selected
+                if ((currentZone[UINumber - 1].zoneSelectButtons & (1 << (i + 1))) != 0)//if zone is selected
                 {
-                    ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber-1].currentGroupNumber - 1, i];//select zone number to send source to
-                    
+                    ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, i];//select zone number to send source to
+
                     sourcer(output, sourceNumber);
-                    
+
                 }
-            } 
+            }
         }
-        void sendOff(uint buttonNum) {
+        void sendOff(uint buttonNum)
+        {
             UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
             uint UINumber = UICalc.UINum(buttonNum);
             uint zoneNumber = UICalc.zoneNumber;
             ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber - 1];
             sourcer(output, 0);
         }
-        void sourcer(ushort output, ushort sourceNumber) {
+        void sourcer(ushort output, ushort sourceNumber)
+        {
             ushort exp;
             if (output > 0)
             {
@@ -683,7 +742,8 @@ namespace AV
                 {
                     swampA.Zones[output].Source.UShortValue = sourceNumber;
                 }
-                else if (output < 11) {//SEND TO SPDIF
+                else if (output < 11)
+                {//SEND TO SPDIF
                     swampA.SpdifOuts[output].SPDIFOutSource.UShortValue = sourceNumber;
                 }
 
@@ -721,15 +781,16 @@ namespace AV
                                 reader.ReadToFollowing("expander");//Configure Expanders
                                 do
                                 {
-                                    swampExpanderTypes[i]=reader.GetAttribute("Type");
+                                    swampExpanderTypes[i] = reader.GetAttribute("Type");
                                     expanderIDs[i] = Convert.ToUInt16(reader.GetAttribute("ID"));
-                                    
+
                                     if (swampExpanderTypes[i] == "swampE4")
                                     {
                                         lastZoneTemp += 4;
-                                        firstZoneTemp = lastZoneTemp -3;
+                                        firstZoneTemp = lastZoneTemp - 3;
                                     }
-                                    else {
+                                    else
+                                    {
                                         lastZoneTemp += 8;
                                         firstZoneTemp = lastZoneTemp - 7;
                                     }
@@ -739,19 +800,20 @@ namespace AV
                                 } while (reader.ReadToNextSibling("expander"));
                                 numberOfExpanders = (ushort)i;
                                 i = 0;
-                                
+
                                 reader.ReadToFollowing("audioZone"); //Audio Zone Names & Numbers
                                 do
                                 {
                                     zoneNameArray[i] = reader.GetAttribute("Name");
                                     zoneNumberArray[i] = Convert.ToUInt16(reader.GetAttribute("zoneNumber"));
                                     i++;
-                                    if (zoneNameArray[i] != " ") {
+                                    if (zoneNameArray[i] != " ")
+                                    {
                                         k++;
                                     }
                                 } while (reader.ReadToNextSibling("audioZone"));
                                 numberOfZones = (ushort)k;
-                                
+
                                 i = 1;
                                 reader.ReadToFollowing("audioSource"); //Audio Source Names & Numbers
                                 sourceNameArray[0] = "Off";
@@ -760,7 +822,7 @@ namespace AV
                                     sourceNameArray[i] = reader.GetAttribute("Name");
                                     i++;
                                 } while (reader.ReadToNextSibling("audioSource"));
-                                
+
                                 i = 0;
                                 reader.ReadToFollowing("group");//group numbers
                                 do
@@ -784,6 +846,135 @@ namespace AV
 
                 }
             }
+        }
+        void saveCurrentStatus(uint presetNumber)
+        {
+            for (int i = 1; i <= numberOfZones; i++)
+            {
+                partyModeSettings.partyVolumes[presetNumber, i] = UItoZone.zoneCurrentVolumes[i];
+                decimal vol = Convert.ToDecimal(UItoZone.zoneCurrentVolumes[i]);
+                CrestronConsole.PrintLine("partySave{0:P} {1}", vol / 65535, UItoZone.zoneCurrentVolumes[i]);
+                partyModeSettings.partySources[presetNumber, i] = UItoZone.zoneCurrentSourceNumber[i];
+            }
+
+        }
+        void recallPartyMode(uint presetNumber)
+        {
+            ushort[] tempVol = new ushort[100];
+            ushort exp;
+            for (ushort i = 1; i <= numberOfZones; i++)
+            {
+                tempVol[i] = UItoZone.zoneCurrentStartupVols[i];//temporarily store the original startup volume
+                if (i < 9)
+                {
+                    swampA.Zones[i].StartupVolume.UShortValue = partyModeSettings.partyVolumes[presetNumber, i];//SET STARTUP VOL
+                }
+                else if (i <= 10)
+                {
+                    //don't do anything
+                }
+                else
+                {//EXPANDER STARTUP VOL
+                    ushort output = i;
+                    CrestronConsole.PrintLine("partyoutput{0}", output);
+                    for (exp = 0; exp < numberOfExpanders; exp++)//calculate expander   
+                    {
+                        if (output <= expanderLastZone[exp])
+                        {
+                            output -= (ushort)(expanderFirstZone[exp]);
+                            output++;
+
+                            break;
+                        }
+                    }
+                    swampA.Expanders[(ushort)(exp + 1)].Zones[output].StartupVolume.UShortValue = partyModeSettings.partyVolumes[presetNumber, i];
+                    decimal vol = partyModeSettings.partyVolumes[presetNumber, i];
+                    CrestronConsole.PrintLine("partyvol {0:P} exp{1} output{2}", vol / 65535, exp, output);
+                }
+
+            }
+            Thread.Sleep(500);
+            for (ushort i = 1; i <= numberOfZones; i++)
+            { sourcer(i, partyModeSettings.partySources[presetNumber, i]); }//send source
+            Thread.Sleep(500);
+            for (ushort i = 1; i < numberOfZones; i++)
+            {
+                if (i < 9)
+                {
+                    swampA.Zones[i].StartupVolume.UShortValue = tempVol[i];//restore startup volume
+                }
+                else if (i > 10)
+                {
+                    ushort output = i;
+                    for (exp = 0; exp < numberOfExpanders; exp++)//calculate expander   
+                    {
+                        if (output <= expanderLastZone[exp])
+                        {
+                            output -= (ushort)(expanderFirstZone[exp]);
+                            output++;
+                            break;
+                        }
+                    }
+                    swampA.Expanders[(ushort)(exp + 1)].Zones[output].StartupVolume.UShortValue = tempVol[i];
+
+                }
+            }
+        }
+        void saveStartupVol(ushort zoneNumber)
+        {
+            ushort exp = 1;
+            if (zoneNumber < 9) { swampA.Zones[zoneNumber].StartupVolume.UShortValue = swampA.Zones[zoneNumber].VolumeFeedback.UShortValue; }
+            else if (zoneNumber >= 11)//send to expander
+            {
+                ushort expOutput = calculateExpanderOutput(zoneNumber);
+                swampA.Expanders[exp].Zones[expOutput].StartupVolume.UShortValue = swampA.Expanders[exp].Zones[expOutput].VolumeFeedback.UShortValue;
+            }
+        }
+        void volumeFromExtAmp()
+        {
+            //!!!CONTINUE!!!
+        }
+        void pressAndHold(uint buttonNumber, bool status)
+        {
+            UIButtonNumberCalc UICalc = new UIButtonNumberCalc();
+            uint UINumber = UICalc.UINum(buttonNumber);
+            int zoneNumber = Convert.ToInt32(UICalc.zoneNumber);//calculate UIZone number
+            ushort output = UItoZone.zoneNumbersInGroups[currentZone[UINumber - 1].currentGroupNumber - 1, zoneNumber - 1];//calculate SwampZone number
+
+            pressHold.presetNum = output;
+            if (status)
+            {
+                pressHold.InitializeTimer(2000);
+                pressHold.TimerHasFinished += new EventHandler(pressHold_TimerHasFinished);
+
+            }
+            else
+            {
+                pressHold.StopTimer();
+            }
+        }
+
+        void pressHold_TimerHasFinished(object sender, EventArgs e)
+        {
+            //saveCurrentStatus(pressHold.presetNum);
+            saveStartupVol(pressHold.presetNum);
+            myEISC.StringInput[800].StringValue = "zone " + pressHold.presetNum + " startup volume changed";
+            throw new NotImplementedException();
+        }
+        ushort calculateExpanderOutput(ushort zoneNumber)
+        {
+            ushort exp;
+            ushort expOutput = (ushort)(zoneNumber + 1);//calculate expander zone
+            for (int j = 0; j < numberOfExpanders; j++)
+            {
+                if (zoneNumber <= expanderLastZone[j])
+                {
+                    exp = (ushort)(j + 1);//expander number
+                    expOutput -= (ushort)expanderFirstZone[j];
+                    break;
+                }
+            }
+            return expOutput;
         }
     }
 }
